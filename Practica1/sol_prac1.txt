@@ -1,0 +1,34 @@
+RESPUESTAS:
+
+1#Documento JSON: 
+persona={"nombre":"Bertoldo","edad":25,"direccion":{"ciudad":"Santa Desidia","cp":10021},"telefonos":{"fijo":666666666,"movil":999999999}}
+
+2#Respuesta correcta (a,b,c,d,e): c
+
+3#Consulta:
+db.gente.find({age:50},{"email":false})
+
+4#Consulta:
+db.catalogo.find({color:"verde",para:"ipad 8",disponible:true},{"nombre":true,"_id":false})
+
+5#Consulta:
+db.catalogo.find().map(function(doc){return doc.precio+doc.precio*0.16})
+
+6#Consulta:
+db.pru.find({},{"_id":false}).sort({"b":1,"a":-1})
+
+7#¿Conmutan? (S/N): S
+7#Ejemplo: 
+db.catalogo.find({},{"_id":false}).limit(2).sort({"precio":1})
+db.catalogo.find({},{"_id":false}).sort({"precio":1}).limit(2)
+
+8#¿Verdadero o Falso? (V/F): F
+8#Justificación: 
+Falso, porque se ejecuta antes el método sort(), independientemente del orden de instrucciones.
+
+9#Instrucción que falta:
+x.a = x.a + x[y]
+
+10#¿Son equivalentes? (S/N): N
+10#Una frase (en caso de S), o un contraejemplo (en caso de N):
+Al realizar una consulta cuyo resultado es vacio, find() no devuelve nada y findOne devuelve un documento vacio (null).
