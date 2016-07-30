@@ -32,3 +32,4 @@ x.a = x.a + x[y]
 10#¿Son equivalentes? (S/N): N
 10#Una frase (en caso de S), o un contraejemplo (en caso de N):
 Al realizar una consulta cuyo resultado es vacio, find() no devuelve nada y findOne devuelve un documento vacio (null).
+
