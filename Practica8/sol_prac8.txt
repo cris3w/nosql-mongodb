@@ -1,0 +1,73 @@
+RESPUESTAS:
+
+1# Instrucciones para crear las carpetas:
+mkdir a1 a2 a3 b1 b2 b3
+mkdir cfg1 cfg2 cfg3
+1# Instrucciones para crear los servidores de configuración:
+mongod --configsvr --dbpath cfg1 --port 26050 --fork --logpath cfg1/log --logappend --smallfiles
+mongod --configsvr --dbpath cfg2 --port 26051 --fork --logpath cfg2/log --logappend --smallfiles
+mongod --configsvr --dbpath cfg3 --port 26052 --fork --logpath cfg3/log --logappend --smallfiles 
+1# Instrucciones para crear los servidores de datos:
+mongod --shardsvr --replSet a --dbpath a1 --logpath a1/log --port 27101 --fork --logappend --oplogSize 50 --smallfiles
+mongod --shardsvr --replSet a --dbpath a2 --logpath a2/log --port 27102 --fork --logappend --oplogSize 50 --smallfiles
+mongod --shardsvr --replSet a --dbpath a3 --logpath a3/log --port 27103 --fork --logappend --oplogSize 50 --smallfiles
+mongod --shardsvr --replSet b --dbpath b1 --logpath b1/log --port 27201 --fork --logappend --oplogSize 50 --smallfiles
+mongod --shardsvr --replSet b --dbpath b2 --logpath b2/log --port 27202 --fork --logappend --oplogSize 50 --smallfiles
+mongod --shardsvr --replSet b --dbpath b3 --logpath b3/log --port 27203 --fork --logappend --oplogSize 50 --smallfiles
+1# Instrucciones para crear el servidor mongos: 
+mongos --configdb pto1107:26050,pto1107:26051,pto1107:26052 --fork --logappend --logpath mongoslog
+
+2# Comandos shell para crear los conjuntos réplica:
+config = {_id: "a",
+           members: [ {_id:0, host:"pto1107:27101" },{_id:1, host:"pto1107:27102" },{_id:2, host:"pto1107:27103" } ] }
+rs.initiate(config)
+config = {_id: "b",
+           members: [ {_id:0, host:"pto1107:27201" },{_id:1, host:"pto1107:27202" },{_id:2, host:"pto1107:27203" } ] }
+rs.initiate(config)
+ 
+3# Comandos shell para crear las particiones
+sh.addShard("a/pto1107:27101")
+sh.addShard("b/pto1107:27201")
+
+#4 ¿Está particionada la base de datos pin-pon? (Sí/No): No
+#4 ¿Qué parte de la respuesta que muestra sh.status lo indica? (una frase)  
+{  "_id" : "pin-pon",  "partitioned" : false,  "primary" : "a" }
+
+#5 Instrucciones
+sh.enableSharding("aleatorio")
+sh.shardCollection("aleatorio.dados",{"dado":1},false)
+
+#6 Número de documentos en la partición a: 3271
+#6 Número de documentos en la partición b: 16729
+Comandos utilizados:
+s.shards.a.count
+s.shards.b.count
+Expresiones a partir de s que permiten obtener esta información:
+"shards" : {
+		...
+		"a" : {
+			...
+			"count" : 3271,
+			...
+		      }
+		}
+"shards" : {
+		...
+		"b" : {
+			...
+			"count" : 16729,
+			...
+		      }
+		}
+
+#7 a) shards: Dos, a y b
+#7 b) claves: 0
+#7 c) documentos: 20000
+
+#8 a) shards: Uno, b
+#8 b) claves: 3373
+#8 c) documentos: 0
+
+#9 Consulta:
+db.chunks.find({ns:"aleatorio.dados","min.dado":{$lte:4},"max.dado":{$gte:4}},{shard:1,_id:0}).pretty()
+
