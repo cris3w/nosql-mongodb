@@ -1,0 +1,36 @@
+RESPUESTAS:
+
+1#Consulta: db.amistad.find({verso:{$regex:"en"}}).count()
+1#Número: 20
+
+2#Instrucción que crea el índice: db.amistad.createIndex({"verso":"text"},"iverso")
+
+3#Consulta: db.amistad.find({$text:{$search:"en"}}).count()
+3#Número: 5
+
+4#Expresión: db.amistad.find({verso:{$regex:"el"}}).count() - db.amistad.find({$text:{$search:"el"}}).count()
+4#Número: 2
+
+5#Instrucción índice 1: db.amistad.createIndex({longitud:-1},"longdown")
+5#Instrucción índice 2: db.amistad.createIndex(({pos:1},"posup",{unique:1})
+
+6#Consulta: db.amistad.find({"longitud":{$gt:30}},{"longitud":1,"pos":1,"_id":0}).sort({longitud:1,pos:-1})
+
+7#
+Índices (nombres de los índices separados por comas (o “ninguno”)): longdown
+Documentos (el total de  documentos accedidos): 22
+Claves (total de claves de índice a las que se han accedido): 22
+Instrucciones (instrucciones que te han permito averiguar esta información (una por línea)): 
+db.amistad.explain("executionStats").find({"longitud":{$gt:30}},{"longitud":1,"pos":1,"_id":0}).sort({longitud:1,pos:-1})
+
+8#Índice: db.amistad.createIndex({longitud:1,pos:-1},"preg8")
+8#Comprobar: db.amistad.explain("executionStats").find({"longitud":{$gt:30}},{"longitud":1,"pos":1,"_id":0}).sort({longitud:1,pos:-1})
+8#Explicación: MongoDB ha utilizado el nuevo indice "preg8" y ha rechazado el indice anterior.
+
+9#Stage: COLLSCAN
+9#Explicación: Este valor indica que no ha realizado uso de ningún índice y ha recorrido entera la colección.
+
+10#Consulta: db.amistad.explain("executionStats").find({$where:"this.pos > this.longitud"})
+10#Índices: ninguno
+10#Rechazados: []
+

@@ -1,0 +1,70 @@
+RESPUESTAS:
+
+db.lugares.insert({nombre:"Manolo",tipo:"bar",pais:"España",posicion:{type:"Point",coordinates:[-3.718016,40.432608]}})
+
+1#Creación del índice y respuesta del shell:
+db.lugares.createIndex({posicion:"2dsphere"})
+{
+	"createdCollectionAutomatically" : false,
+	"numIndexesBefore" : 1,
+	"numIndexesAfter" : 2,
+	"ok" : 1
+}
+
+2#Consulta:
+db.lugares.find({'posicion':{$near:{$geometry:{type:'Point',coordinates:[-3.7251149,40.4381963]},$maxDistance:1000}}},{nombre:1,tipo:1,_id:0})
+
+{ "nombre" : "Ciudad Universitaria", "tipo" : "metro" }
+{ "nombre" : "Manolo", "tipo" : "bar" }
+
+3#Instrucción borrar: db.lugares.dropIndex({posicion:"2dsphere"})
+3#Respuesta al repetir consulta 2:
+db.lugares.find({'posicion':{$near:{$geometry:{type:'Point',coordinates:[-3.7251149,40.4381963]},$maxDistance:1000}}},{nombre:1,tipo:1,_id:0})
+
+Error: error: {
+	"$err" : "Unable to execute query: error processing query: ns=test.lugares limit=0 skip=0\nTree: GEONEAR  field=posicion maxdist=1000 isNearSphere=0\nSort: {}\nProj: { _id: 0.0, nombre: 1.0, tipo: 1.0 }\n planner returned error: unable to find index for $geoNear query",
+	"code" : 17007
+}
+
+4#Creación de los índices:
+db.plano.createIndex({punto:1},"ipunto")
+db.plano.createIndex({desc:1},"idesc")
+
+4#Comprobar tamaño: db.plano.stats()
+Tamaño ipunto: 6303696
+Tamaño idesc:  3368512
+4#¿Cuál es mayor? ipunto
+4#¿Por qué? Porque el valor de la clave de ipunto es un array y se genera una entrada por cada elemento del array.
+
+5#Consulta: db.plano.find({"punto.0":{$gt:480}}).count()
+
+6#Instrucción para obtener las respuestas: db.plano.explain().find({punto:{$lt:2}},{desc:1,_id:0})
+6#¿Utiliza el índice? Sí
+6#¿Cuál? ipunto
+6#¿Claves consultadas? 1000
+6#¿Documentos accedidos? 999
+
+7#Instrucción para obtener las respuestas: db.plano.explain("executionStats").find({desc:{$gt:"(5"}},{desc:1,_id:0})
+7#¿Documentos accedidos? 0
+7#¿Por qué? No se necesita acceder a cada documento porque sólo se consulta la clave, que ya está en el índice.
+
+8#Consulta: db.plano.find({punto:{$geoWithin:{$polygon:[[0,0],[3,0],[3,3],[0,3]]}}})
+
+9#Instrucción para crear el índice: db.plano.createIndex({punto:"2d"})
+
+9#¿Se obtiene algún error?
+{
+	"createdCollectionAutomatically" : false,
+	"numIndexesBefore" : 3,
+	"errmsg" : "exception: point not in interval of [ -180, 180 ] :: caused by :: { _id: ObjectId('57050e0c64cb32a971470d89'), desc: \"(181,0)\", punto: [ 181.0, 0.0 ] }",
+	"code" : 13027,
+	"ok" : 0
+}
+
+9#¿Por qué?: Porque existen puntos de la colección "plano" fuera del intervalo de longitud (coordenadas erróneas).
+
+10#Instrucción para crear el índice: db.plano.createIndex({punto:-1,desc:1},"ejer10")
+10#¿Cómo sabes que mejora? Si
+10#Una frase (en caso de S), o un contraejemplo (en caso de N):
+Porque al ver el plan de ejecución vemos que utiliza nuestro índice ejer10 y descarta los otros.
+
