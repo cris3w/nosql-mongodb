@@ -1,0 +1,36 @@
+RESPUESTAS:
+
+1#Consulta: 
+db.andrajos.update({_id:"Isca"},{$set:{País:"Andorra"}})
+
+2#Consulta: 
+db.andrajos.update({_id:"Oldo"},{$push:{pedidos:{$each:[{item:"corbata con dibujitos de ositos",precio:120,enviada:false}],$position:0}}})
+
+3#Consulta:
+db.andrajos.update({_id:"Oldo"},{$set:{"pedidos.0.enviada":true}})
+
+4#Consulta:
+db.andrajos.update({"pedidos.precio":{$gt:100}},{$set:{premium:true}},{multi:true})
+
+5#Consulta:
+db.andrajos.update({País:{$ne:"España"}},{$unset:{premium:true}},{multi:true})
+
+6#Consulta:
+db.andrajos.remove($and[{_id:"Oldo"},{"pedidos.enviada":{$nin:[false]}}])
+
+7#
+Resultado1:	{ "_id":"Mike", "interests":["chess","botany","skydiving"]}
+Explicación1: 	Porque $push añade un elemento al final del array (si el array no existe, lo crea).
+Resultado2: { "_id":"Mike", "interests":["botany","skydiving"]}
+Explicación2:	Porque $pop elimina el último elemento, pero en este caso al poner un valor negativo elimina el primero.
+Resultado2:	{ "_id":"Mike", "interests":["botany","skydiving"]}
+Explicación2:	Porque $addToSet añade el elemento considerando el array como si fuera un conjunto, es decir, si el elemento ya existe no lo añade, y en este caso “skydiving” ya existía.
+Resultado3:	{ "_id":"Mike", "interests":["botany","skydiving","skydiving","skiing"]}
+Explicación3:	Porque $pushAll añade una lista de valores al final del array (si el array no existe, lo crea).
+
+8#Consulta: (dificil)
+db.pru.find({a:{$not:{$elemMatch:{$nin:[1,4,5,2,3,5,1,4,8]}}}})
+
+9#Consulta (una única incluyendo los dos apartados):
+db.andrajos.update({"_id":"Oldo"},{"$set":{"País":"Italia"},$setOnInsert:{pedidos:[]}},{upsert:true})
+
